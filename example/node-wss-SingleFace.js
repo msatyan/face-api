@@ -1,5 +1,8 @@
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+
+const WebSocket = require('ws')
+const wss = new WebSocket.Server({ port: 8080 })
+
+const uuid = require("uuid");
 
 // const fs = require('fs');
 const path = require('path');
@@ -72,15 +75,16 @@ class SingleFace {
 
 //////////////////////////////////////////////
 wss.on('connection', (ws) => {
-    // ws has to of type any to assign a new element
     ws['id'] = uuid.v4();
-
     const minScore = 0.1;
     const maxResults = 5;
-    const myFace1 = await new SingleFace(minScore, maxResults);
+    const myFace1 = new SingleFace(minScore, maxResults);
 
-    // The incoming message
-    ws.on('message', async function incoming(message) {
+    console.log('Testing-1');
+    ws.on('message', async (message) => {
+        console.log(`Received message => ${message}`)
+        //////////////////////////////
+        console.log('Testing-2');
         let req;
         let action = "";
         let id = 0;
@@ -108,15 +112,13 @@ wss.on('connection', (ws) => {
         let res = JSON.stringify({ xid: 0, id: id, action: `${action} is unknown request` });
         if (action === 'GetImgLandmarks') {
             console.log('GetImgLandmarks:');
-            let rc = await myFace1.GetLandmarkDescriptors(req.img1);
-            res = rc.landmarks;
+            // let rc = await myFace1.GetLandmarkDescriptors(req.img1);
+            // res = rc.landmarks;
+            res = "GetLandmarkDescriptors OK !!!!!";
         }
 
         console.log('res len =' + res.length);
         ws.send(res);
     });
-
-    ws.send(JSON.stringify({ xid: 1, id: ws.id, action: "connection", msg: "Success" }));
-});
-
-
+    ws.send('Hello! Message From Server!!')
+})
