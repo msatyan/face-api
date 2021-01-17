@@ -50,7 +50,7 @@ class SingleFace {
 
     async GetLandmarkDescriptors(img) {
         const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options(
-                { minConfidence: this.minScore, any: this.maxResults });
+            { minConfidence: this.minScore, any: this.maxResults });
         const tensor = await this.image(img);
         const result = await faceapi
             .detectAllFaces(tensor, optionsSSDMobileNet)
@@ -106,8 +106,8 @@ wss.on('connection', (ws) => {
 
         /////////// server: GetImgLandmarks ///////////
         let res = JSON.stringify({ xid: 0, id: id, action: `${action} is unknown request` });
-        if (action === 'GetImgLandmarks' ) {
-            console.log( 'GetImgLandmarks:');
+        if (action === 'GetImgLandmarks') {
+            console.log('GetImgLandmarks:');
             let rc = await myFace1.GetLandmarkDescriptors(req.img1);
             res = rc.landmarks;
         }
