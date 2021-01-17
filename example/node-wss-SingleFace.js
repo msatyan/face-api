@@ -15,7 +15,7 @@ const tf = require('@tensorflow/tfjs-node');
 const faceapi = require('../dist/face-api.node.js'); // this is equivalent to '@vladmandic/faceapi'
 
 const modelPathRoot = '../model';
-
+let IsInitModel = false;
 
 class SingleFace {
     constructor(minScore, maxResults) {
@@ -25,7 +25,7 @@ class SingleFace {
         this.maxResults = maxResults;
     }
 
-    async Init() {
+    async InitModel() {
         const t0 = process.hrtime.bigint();
         await faceapi.tf.setBackend('tensorflow');
         await faceapi.tf.enableProdMode();
@@ -86,7 +86,15 @@ wss.on('connection', async (ws) => {
         console.log(`Received message => ${message}`)
         //////////////////////////////
         console.log('Testing-2');
-        await myFace1.Init();
+        if ( IsInitModel === false ) {
+            console.log('Calling InitModel()......');
+            try {
+                await myFace1.InitModel();
+                IsInitModel = true;
+            } catch(error) {
+                console.log('Error: InitModel()');
+            }
+        }
         console.log('Testing-3');
         let req;
         let action = "";
