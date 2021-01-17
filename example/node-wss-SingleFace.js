@@ -1,5 +1,8 @@
-
+const fs = require('fs');
 const WebSocket = require('ws')
+// const canvas = require('canvas')
+const {Base64} = require('js-base64');
+
 const wss = new WebSocket.Server({ port: 8080 })
 
 const uuid = require("uuid");
@@ -16,31 +19,28 @@ const modelPathRoot = '../model';
 
 class SingleFace {
     constructor(minScore, maxResults) {
+        // log.header();
+        log.info('SingleFace constructor:');
         this.minScore = minScore;
         this.maxResults = maxResults;
-
-        return (async () => {
-            // log.header();
-            log.info('SingleFace constructor:');
-            const t0 = process.hrtime.bigint();
-
-            await faceapi.tf.setBackend('tensorflow');
-            await faceapi.tf.enableProdMode();
-            await faceapi.tf.ENV.set('DEBUG', false);
-            await faceapi.tf.ready();
-
-            // log.state(`Version: TensorFlow/JS ${faceapi.tf?.version_core} FaceAPI ${faceapi.version.faceapi} Backend: ${faceapi.tf?.getBackend()}`);
-            // log.info('Loading FaceAPI models');
-
-            const modelPath = path.join(__dirname, modelPathRoot);
-            await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
-            await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
-            await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
-
-            // When done return the 'this' instance
-            return this;
-        })();
     }
+
+    async Init() {
+        const t0 = process.hrtime.bigint();
+        await faceapi.tf.setBackend('tensorflow');
+        await faceapi.tf.enableProdMode();
+        await faceapi.tf.ENV.set('DEBUG', false);
+        await faceapi.tf.ready();
+
+        // log.state(`Version: TensorFlow/JS ${faceapi.tf?.version_core} FaceAPI ${faceapi.version.faceapi} Backend: ${faceapi.tf?.getBackend()}`);
+        // log.info('Loading FaceAPI models');
+
+        const modelPath = path.join(__dirname, modelPathRoot);
+        await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
+        await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
+        await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
+    }
+
 
     async image(imgBuff) {
         const decoded = tf.node.decodeImage(imgBuff);
@@ -55,6 +55,7 @@ class SingleFace {
         const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options(
             { minConfidence: this.minScore, any: this.maxResults });
         const tensor = await this.image(img);
+        // const tensor = await canvas.loadImage(img)
         const result = await faceapi
             .detectAllFaces(tensor, optionsSSDMobileNet)
             .withFaceLandmarks()
@@ -74,7 +75,7 @@ class SingleFace {
 
 
 //////////////////////////////////////////////
-wss.on('connection', (ws) => {
+wss.on('connection', async (ws) => {
     ws['id'] = uuid.v4();
     const minScore = 0.1;
     const maxResults = 5;
@@ -85,6 +86,8 @@ wss.on('connection', (ws) => {
         console.log(`Received message => ${message}`)
         //////////////////////////////
         console.log('Testing-2');
+        await myFace1.Init();
+        console.log('Testing-3');
         let req;
         let action = "";
         let id = 0;
@@ -111,10 +114,11 @@ wss.on('connection', (ws) => {
         /////////// server: GetImgLandmarks ///////////
         let res = JSON.stringify({ xid: 0, id: id, action: `${action} is unknown request` });
         if (action === 'GetImgLandmarks') {
-            console.log('GetImgLandmarks:');
-            // let rc = await myFace1.GetLandmarkDescriptors(req.img1);
-            // res = rc.landmarks;
-            res = "GetLandmarkDescriptors OK !!!!!";
+            console.log('GetImgLandmarks *:');
+            let buff1 = Base64.toUint8Array(req.img1);
+            let rc = await myFace1.GetLandmarkDescriptors(buff1);
+            res = rc.landmarks;
+            // res = "GetLandmarkDescriptors OK !!!!!";
         }
 
         console.log('res len =' + res.length);
