@@ -123,7 +123,12 @@ wss.on('connection', async (ws) => {
         let res = JSON.stringify({ xid: 0, id: id, action: `${action} is unknown request` });
         if (action === 'GetImgLandmarks') {
             console.log('GetImgLandmarks *:');
-            let buff1 = Base64.toUint8Array(req.img1);
+
+            // To replace "data:image/jpeg;base64," from the image if any
+            var img1 = req.img1.replace(/^data:image\/[a-z]+;base64,/, "");
+
+            // Convert from Base64 to a binary value.
+            let buff1 = Base64.toUint8Array(img1);
             let rc = await myFace1.GetLandmarkDescriptors(buff1);
             res = rc.landmarks;
             // res = "GetLandmarkDescriptors OK !!!!!";
