@@ -38,7 +38,9 @@
   },
   "homepage": "https://github.com/vladmandic/face-api#readme",
   "dependencies": {
-    "@vladmandic/pilogger": "^0.2.11"
+    "@vladmandic/pilogger": "^0.2.11",
+    "uuid": "^8.3.2",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@tensorflow/tfjs": "^2.8.3",
