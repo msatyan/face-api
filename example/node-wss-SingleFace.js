@@ -1,10 +1,5 @@
-const fs = require('fs');
 const WebSocket = require('ws')
-// const canvas = require('canvas')
 const {Base64} = require('js-base64');
-
-const wss = new WebSocket.Server({ port: 8080 })
-
 const uuid = require("uuid");
 
 // const fs = require('fs');
@@ -14,8 +9,9 @@ const log = require('@vladmandic/pilogger');
 const tf = require('@tensorflow/tfjs-node');
 const faceapi = require('../dist/face-api.node.js'); // this is equivalent to '@vladmandic/faceapi'
 
-const modelPathRoot = '../model';
+const wss = new WebSocket.Server({ port: 8080 })
 let IsInitModel = false;
+const modelPathRoot = '../model';
 
 class SingleFace {
     constructor(minScore, maxResults) {
@@ -55,7 +51,6 @@ class SingleFace {
         const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options(
             { minConfidence: this.minScore, any: this.maxResults });
         const tensor = await this.image(img);
-        // const tensor = await canvas.loadImage(img)
         const result = await faceapi
             .detectAllFaces(tensor, optionsSSDMobileNet)
             .withFaceLandmarks()
@@ -63,6 +58,7 @@ class SingleFace {
 
         let rc = { landmarks: "" };
         if (result.length === 1) {
+            // Convert it to CSV format
             rc.landmarks = result[0].descriptor.join(', ');
         } else {
             rc.landmarks = `incorrect number of objects found: result.length=${result.length}`;
@@ -76,26 +72,26 @@ class SingleFace {
 
 //////////////////////////////////////////////
 wss.on('connection', async (ws) => {
+
+    console.log(`WSS:connection`);
     ws['id'] = uuid.v4();
     const minScore = 0.1;
     const maxResults = 5;
-    const myFace1 = new SingleFace(minScore, maxResults);
+    const sf1 = new SingleFace(minScore, maxResults);
 
-    console.log('Testing-1');
     ws.on('message', async (message) => {
-        console.log(`Received message => ${message}`)
         //////////////////////////////
-        console.log('Testing-2');
+        // console.log(`Received message => ${message}`)
         if ( IsInitModel === false ) {
             console.log('Calling InitModel()......');
             try {
-                await myFace1.InitModel();
+                await sf1.InitModel();
                 IsInitModel = true;
             } catch(error) {
                 console.log('Error: InitModel()');
             }
         }
-        console.log('Testing-3');
+
         let req;
         let action = "";
         let id = 0;
@@ -122,20 +118,20 @@ wss.on('connection', async (ws) => {
         /////////// server: GetImgLandmarks ///////////
         let res = JSON.stringify({ xid: 0, id: id, action: `${action} is unknown request` });
         if (action === 'GetImgLandmarks') {
-            console.log('GetImgLandmarks *:');
+            console.log('Running GetLandmarkDescriptors....');
 
             // To replace "data:image/jpeg;base64," from the image if any
             var img1 = req.img1.replace(/^data:image\/[a-z]+;base64,/, "");
 
             // Convert from Base64 to a binary value.
             let buff1 = Base64.toUint8Array(img1);
-            let rc = await myFace1.GetLandmarkDescriptors(buff1);
+            let rc = await sf1.GetLandmarkDescriptors(buff1);
             res = rc.landmarks;
-            // res = "GetLandmarkDescriptors OK !!!!!";
         }
 
         console.log('res len =' + res.length);
+        console.log();
         ws.send(res);
     });
-    ws.send('Hello! Message From Server!!')
+    ws.send('Message From WS Server: Connection OK !!!')
 })

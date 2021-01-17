@@ -11,31 +11,28 @@ const modelPathRoot = '../model';
 
 class SingleFace {
     constructor(minScore, maxResults) {
+        // log.header();
+        log.info('SingleFace constructor:');
         this.minScore = minScore;
         this.maxResults = maxResults;
-
-        return (async () => {
-            // log.header();
-            log.info('SingleFace constructor:');
-            const t0 = process.hrtime.bigint();
-
-            await faceapi.tf.setBackend('tensorflow');
-            await faceapi.tf.enableProdMode();
-            await faceapi.tf.ENV.set('DEBUG', false);
-            await faceapi.tf.ready();
-
-            // log.state(`Version: TensorFlow/JS ${faceapi.tf?.version_core} FaceAPI ${faceapi.version.faceapi} Backend: ${faceapi.tf?.getBackend()}`);
-            // log.info('Loading FaceAPI models');
-
-            const modelPath = path.join(__dirname, modelPathRoot);
-            await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
-            await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
-            await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
-
-            // When done return the this instance
-            return this;
-        })();
     }
+
+    async InitModel() {
+        const t0 = process.hrtime.bigint();
+        await faceapi.tf.setBackend('tensorflow');
+        await faceapi.tf.enableProdMode();
+        await faceapi.tf.ENV.set('DEBUG', false);
+        await faceapi.tf.ready();
+
+        // log.state(`Version: TensorFlow/JS ${faceapi.tf?.version_core} FaceAPI ${faceapi.version.faceapi} Backend: ${faceapi.tf?.getBackend()}`);
+        // log.info('Loading FaceAPI models');
+
+        const modelPath = path.join(__dirname, modelPathRoot);
+        await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
+        await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
+        await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
+    }
+
 
     async image(imgBuff) {
         const decoded = tf.node.decodeImage(imgBuff);
@@ -47,7 +44,8 @@ class SingleFace {
     }
 
     async GetLandmarkDescriptors(img) {
-        const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options({ minConfidence: this.minScore, any: this.maxResults });
+        const optionsSSDMobileNet = new faceapi.SsdMobilenetv1Options(
+            { minConfidence: this.minScore, any: this.maxResults });
         const tensor = await this.image(img);
         const result = await faceapi
             .detectAllFaces(tensor, optionsSSDMobileNet)
@@ -56,6 +54,7 @@ class SingleFace {
 
         let rc = { landmarks: "" };
         if (result.length === 1) {
+            // Convert it to CSV format
             rc.landmarks = result[0].descriptor.join(', ');
         } else {
             rc.landmarks = `incorrect number of objects found: result.length=${result.length}`;
@@ -65,6 +64,7 @@ class SingleFace {
     }
 
 }
+
 
 function EuclideanDistance(csv1, csv2, tag) {
     // convert CSV to Array
@@ -83,24 +83,27 @@ function EuclideanDistance(csv1, csv2, tag) {
 async function main() {
     const minScore = 0.1;
     const maxResults = 5;
-    const sf = await new SingleFace(minScore, maxResults);
+    const sf1 = new SingleFace(minScore, maxResults);
+
+    // Initialize model
+    await sf1.InitModel();
 
     let imgBuff = fs.readFileSync(path.join('./example/test1', 'modi1.jpg'));
-    let rc1 = await sf.GetLandmarkDescriptors(imgBuff);
+    let rc1 = await sf1.GetLandmarkDescriptors(imgBuff);
     // log.info(JSON.stringify(rc1, null, 4));
 
     imgBuff = fs.readFileSync(path.join('./example/test1', 'modi2.jpg'));
-    let rc2 = await sf.GetLandmarkDescriptors(imgBuff);
+    let rc2 = await sf1.GetLandmarkDescriptors(imgBuff);
 
     EuclideanDistance(rc1.landmarks, rc2.landmarks, '(modi1 vs modi2)');
 
     imgBuff = fs.readFileSync(path.join('./example/test1', 'trump1.jpg'));
-    rc1 = await sf.GetLandmarkDescriptors(imgBuff);
+    rc1 = await sf1.GetLandmarkDescriptors(imgBuff);
     // Let us test tow different persons (trump1 vs modi2)
     EuclideanDistance(rc1.landmarks, rc2.landmarks, '(trump1 vs modi2)');
 
     imgBuff = fs.readFileSync(path.join('./example/test1', 'trump2.jpg'));
-    rc2 = await sf.GetLandmarkDescriptors(imgBuff);
+    rc2 = await sf1.GetLandmarkDescriptors(imgBuff);
     EuclideanDistance(rc1.landmarks, rc2.landmarks, '(trump1 vs trump2)');
 }
 
