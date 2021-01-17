@@ -6,6 +6,11 @@ const WebSocket = require('ws')
 const url = 'ws://localhost:8080'
 const connection = new WebSocket(url)
 
+function myExitFunc(con) {
+  con.close();
+}
+
+
 connection.onopen = () => {
   let msg = {
     id: 0,
@@ -13,13 +18,24 @@ connection.onopen = () => {
     img1: ""
   };
 
-  let imgBuff = fs.readFileSync(path.join('./example/test1', 'modi1.jpg'));
+  let fpath = path.join('./example/test1', 'modi1.jpg');
+
+  // If Command-line Arguments is given use that.
+  if ( process.argv.length === 3) {
+    fpath = path.join(process.argv[2]);
+  }
+
+  let imgBuff = fs.readFileSync(fpath);
   let base64_string = imgBuff.toString('base64')
   // msg.img1 = "data:image/jpeg;base64," + base64_string;
   msg.img1 =  base64_string;
 
   let req = JSON.stringify( msg );
   connection.send(req);
+
+  // We are done the test, let us close connection and end program.
+  // execute as close to milliseconds
+  setTimeout( myExitFunc, 1000, connection );
 }
 
 connection.onerror = (error) => {
