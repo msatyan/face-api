@@ -8,6 +8,7 @@ const connection = new WebSocket(url)
 
 function myExitFunc(con) {
   con.close();
+  console.log();
 }
 
 

@@ -21,7 +21,7 @@ node demo1/node-wsc-test1.js ./demo1/img/modi2.jpg
 ```
 
 
-### Sample Docker Build & Test
+### Docker Build & Test
 ```bash
 # to cleanup then only
 docker system prune
@@ -41,6 +41,7 @@ docker run -it -d --name fcai-cnt1 -p 8080:8080 -d wss-fcai
 ### Basic test
 ```bash
 node demo1/node-wsc-test1.js
+node demo1/node-wsc-test1.js ./demo1/img/modi2.jpg
 ```
 
 ### stop/start container
@@ -57,17 +58,23 @@ docker ps -a
 docker exec -it fcai-cnt1 /bin/bash
 ```
 
-### delete the container
+### DELETE: container/docker image
 ```bash
 docker container rm fcai-cnt1
 # fcai-cnt1
 
 docker ps -a
 # CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+# To remove docker image
+docker images
+docker image rm <image id>
 ```
+
 
 ### Create a new docker image from the container and push to docker hub
 ```bash
+# FYI: Your password will be stored unencrypted in ~/.docker/config.json
 docker login
 docker logout
 
