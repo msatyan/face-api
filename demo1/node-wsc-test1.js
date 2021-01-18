@@ -18,7 +18,7 @@ connection.onopen = () => {
     img1: ""
   };
 
-  let fpath = path.join('./example/test1', 'modi1.jpg');
+  let fpath = path.join('./demo1/img', 'modi1.jpg');
 
   // If Command-line Arguments is given use that.
   if ( process.argv.length === 3) {

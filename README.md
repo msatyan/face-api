@@ -9,16 +9,15 @@ Forked from [face-api.js](https://github.com/justadudewhohacks/face-api.js) vers
 Currently based on **`TensorFlow/JS` 2.8.3**  
 
 
-### Simple test
+### Simple Demo
+- [Simple Demo](./demo1/README.md)
 ```bash
 git clone <url>
 
 cd face-api
 npm install
-
-# Simple test of GetFaceLandmarkDescriptors
-node example/node-GetFaceLandmarkDescriptors.js
 ```
+
 
 ### Why?
 

@@ -11,13 +11,13 @@ npm install
 # simple test
 
 # bring up WSS server
-node example/node-wss-SingleFace.js
+node demo1/node-wss-SingleFace.js
 
 # WSC client connect to the WSS server
-node example/node-wsc-test1.js
+node demo1/node-wsc-test1.js
 
 # Command-line Argument to specify an image.
-node example/node-wsc-test1.js ./example/test1/modi2.jpg
+node demo1/node-wsc-test1.js ./demo1/img/modi2.jpg
 ```
 
 
@@ -34,21 +34,13 @@ docker build -t wss-fcai .
 
 docker images
 # maped local-port:container-port
-# docker run  -it wss-fcai /bin/bash
-# docker run -it -p 8080:8080 -d wss-fcai
-
 # run the docker by assigning a container name = fcai-cnt1
 docker run -it -d --name fcai-cnt1 -p 8080:8080 -d wss-fcai
-
-# Basic test
-node example/node-wsc-test1.js
 ```
 
-### Getting in to the running container
+### Basic test
 ```bash
-docker ps -a
-# runs a new command in a running container.
-docker exec -it fcai-cnt1 /bin/bash
+node demo1/node-wsc-test1.js
 ```
 
 ### stop/start container
@@ -58,6 +50,13 @@ docker start fcai-cnt1
 ```
 
 
+### Getting in to the running container
+```bash
+docker ps -a
+# runs a new command in a running container.
+docker exec -it fcai-cnt1 /bin/bash
+```
+
 ### delete the container
 ```bash
 docker container rm fcai-cnt1
@@ -66,7 +65,6 @@ docker container rm fcai-cnt1
 docker ps -a
 # CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 ```
-
 
 ### Create a new docker image from the container and push to docker hub
 ```bash
@@ -103,7 +101,6 @@ docker system prune -a
 # logout from container registry
 docker logout
 ```
-
 
 
 
