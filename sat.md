@@ -35,20 +35,38 @@ docker build -t wss-fcai .
 docker images
 # maped local-port:container-port
 # docker run  -it wss-fcai /bin/bash
-docker run -it -p 8080:8080 -d wss-fcai
+# docker run -it -p 8080:8080 -d wss-fcai
+
+# run the docker by assigning a container name = fcai-cnt1
+docker run -it -d --name fcai-cnt1 -p 8080:8080 -d wss-fcai
 
 # Basic test
 node example/node-wsc-test1.js
-
-
-#### to stop
-# get the ps
-docker ps | grep wss-fcai
-# d0d7b996862d
-
-# eg:
-docker stop  d0d7b996862d
 ```
+
+### Getting in to the running container
+```bash
+docker ps -a
+# runs a new command in a running container.
+docker exec -it fcai-cnt1 /bin/bash
+```
+
+### stop/start container
+```bash
+docker stop fcai-cnt1
+docker start fcai-cnt1
+```
+
+
+### delete the container
+```bash
+docker container rm fcai-cnt1
+# fcai-cnt1
+
+docker ps -a
+# CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+```
+
 
 ### Create a new docker image from the container and push to docker hub
 ```bash
@@ -74,6 +92,19 @@ docker pull xuser1/wss-fcai
 docker run -it -p 8080:8080 -d xuser1/wss-fcai
 # https://cloud.docker.com/repository/docker/xuser1/wss-fcai
 ```
+
+
+### Cleanup
+```bash
+# incase if you have to clean the existing images
+docker system prune
+docker system prune -a
+
+# logout from container registry
+docker logout
+```
+
+
 
 
 ### Firewall
