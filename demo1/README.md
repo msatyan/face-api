@@ -80,10 +80,10 @@ docker logout
 
 
 docker ps | grep wss-fapi2
-# d0d7b996862d
+# 03015aeabf25
 
 # docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
-docker commit d0d7b996862d  xuser1/wss-fapi2
+docker commit 03015aeabf25  xuser1/wss-fapi2
 
 # to push the image to docker hub
 # docker push [OPTIONS] NAME[:TAG]
@@ -94,8 +94,13 @@ docker push xuser1/wss-fapi2
 ### Pull the docker image from the docker hub and run
 ```bash
 docker pull xuser1/wss-fapi2
-docker run -it -p 8080:8080 -d xuser1/wss-fapi2
+docker run -it -d --name fapi2-cnt1 -p 8080:8080 -d xuser1/wss-fapi2
 # https://cloud.docker.com/repository/docker/xuser1/wss-fapi2
+
+# test
+# cd face-api
+# npm install
+# node demo1/node-wsc-test1.js ./demo1/img/modi2.jpg
 ```
 
 
