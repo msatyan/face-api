@@ -133,5 +133,8 @@ wss.on('connection', async (ws) => {
         console.log();
         ws.send(res);
     });
-    ws.send('Message From WS Server: Connection OK !!!')
+
+    // FYI: xid:1 is needed to identify msg from connection. 
+    ws.send(JSON.stringify( {xid:1, id:ws.id, action:"connection", msg:"Success" }));
 })
+
